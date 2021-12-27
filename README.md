@@ -6,7 +6,7 @@ This is the implementation of the paper "ComboTree: A Persistent Indexing Struct
 ## 2 Compliation and Run
 
 ### 2.1 Tools
-ComboTree acesses NVM via PMDK. To run ComboTree, please install [PMDK](https://github.com/pmem/pmdk), libpmemobj-cpp(https://github.com/pmem/libpmemobj-cpp) and pmemkv(https://github.com/pmem/pmemkv) first.
+ComboTree acesses NVM via PMDK. To run ComboTree, please install [PMDK](https://github.com/pmem/pmdk), [libpmemobj-cpp](https://github.com/pmem/libpmemobj-cpp) and [pmemkv](https://github.com/pmem/pmemkv) first.
 
 ### 2.2 Compilation
 ```
