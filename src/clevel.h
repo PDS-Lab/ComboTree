@@ -96,8 +96,8 @@ class __attribute__((packed)) CLevel {
         cur_addr_((uintptr_t)base_addr), end_addr_((uint8_t*)base_addr+size)
     {}
 
-    MemControl(std::string pmem_file, size_t file_size)
-      : pmem_file_(pmem_file+std::to_string(file_id_++))
+    MemControl(std::string pmem_dir, size_t file_size)
+      : pmem_file_(pmem_dir+std::string("combotree-clevel-")+std::to_string(file_id_++))
     {
 #ifdef USE_LIBPMEM
       int is_pmem;

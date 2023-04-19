@@ -326,7 +326,7 @@ namespace combotree
     static_assert(sizeof(BLevel::Entry) == 128, "sizeof(BLevel::Entry) != 128");
 
   public:
-    BLevel(size_t entries);
+    BLevel(std::string pmem_dir, size_t entries);
     ~BLevel();
 
     bool Put(uint64_t key, uint64_t value, uint64_t begin, uint64_t end);

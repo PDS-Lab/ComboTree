@@ -12,7 +12,7 @@ class ComboTree;
 // in-memory
 class ALevel {
  public:
-  ALevel(BLevel* blevel, int span = DEFAULT_SPAN);
+  ALevel(std::string pmem_dir, BLevel* blevel, int span = DEFAULT_SPAN);
   ~ALevel();
 
   ALWAYS_INLINE bool Put(uint64_t key, uint64_t value) {

@@ -16,12 +16,12 @@ namespace combotree {
 std::mutex log_mutex;
 int64_t expand_time = 0;
 
-ComboTree::ComboTree(std::string pool_dir, size_t pool_size, bool create)
-    : pool_dir_(pool_dir), pool_size_(pool_size), alevel_(nullptr),
+ComboTree::ComboTree(std::string pmem_dir, bool create)
+    : pmem_dir_(pmem_dir), alevel_(nullptr),
       blevel_(nullptr), old_blevel_(nullptr), pmemkv_(nullptr), permit_delete_(true)
 {
   ValidPoolDir_();
-  manifest_ = new Manifest(pool_dir_);
+  manifest_ = new Manifest(pmem_dir_);
   pmemkv_ = new PmemKV(manifest_->PmemKVPath());
   status_ = State::USING_PMEMKV;
 
@@ -123,13 +123,13 @@ void ComboTree::ChangeToComboTree_() {
   std::vector<std::pair<uint64_t,uint64_t>> exist_kv;
   pmemkv_->Scan(0, UINT64_MAX, UINT64_MAX, exist_kv);
 
-  blevel_ = new BLevel(exist_kv.size());
+  blevel_ = new BLevel(pmem_dir_, exist_kv.size());
   old_blevel_ = blevel_;
   blevel_->Expansion(exist_kv);
 
   {
     std::lock_guard<std::shared_mutex> lock(alevel_lock_);
-    alevel_ = new ALevel(blevel_);
+    alevel_ = new ALevel(pmem_dir_, blevel_);
   }
   // change manifest first
   manifest_->SetIsComboTree(true);
@@ -160,7 +160,7 @@ void ComboTree::ExpandComboTree_() {
   need_sleep_.store(sleeped_threads_ < EXPAND_THREADS);
 
   // old_blevel_ is set when last expanding finish.
-  blevel_ = new BLevel(old_blevel_->Size());
+  blevel_ = new BLevel(pmem_dir_, old_blevel_->Size());
   blevel_->PrepareExpansion(old_blevel_);
 
   s = State::PREPARE_EXPANDING;
@@ -180,7 +180,7 @@ void ComboTree::ExpandComboTree_() {
   {
     std::lock_guard<std::shared_mutex> lock(alevel_lock_);
     delete alevel_;
-    alevel_ = new ALevel(blevel_);
+    alevel_ = new ALevel(pmem_dir_, blevel_);
     delete old_blevel_;
     old_blevel_ = blevel_;
   }
@@ -212,9 +212,9 @@ void ComboTree::ExpandComboTree_() {
   ALevel* old_alevel = alevel_;
   BLevel* old_blevel = blevel_;
 
-  blevel_ = new BLevel(old_blevel->Size());
+  blevel_ = new BLevel(pmem_dir_, old_blevel->Size());
   blevel_->Expansion(old_blevel);
-  alevel_ = new ALevel(blevel_);
+  alevel_ = new ALevel(pmem_dir_, blevel_);
 
   delete old_alevel;
   delete old_blevel;
@@ -566,14 +566,14 @@ bool dir_exists(const std::string& name) {
 } // anonymous namespace
 
 bool ComboTree::ValidPoolDir_() {
-  if (pool_dir_.empty())
+  if (pmem_dir_.empty())
     return false;
 
-  if (!dir_exists(pool_dir_))
+  if (!dir_exists(pmem_dir_))
     return false;
 
-  if (pool_dir_.back() != '/')
-    pool_dir_.push_back('/');
+  if (pmem_dir_.back() != '/')
+    pmem_dir_.push_back('/');
 
   return true;
 }

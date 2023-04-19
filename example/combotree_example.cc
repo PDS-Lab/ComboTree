@@ -6,10 +6,12 @@
 #include <thread>
 #include <map>
 #include "combotree/combotree.h"
-#include "combotree_config.h"
 #include "random.h"
 
 #define TEST_SIZE   4000000
+
+// Change this to your pmem mounted directory with the end '/'
+#define COMBOTREE_DIR	"/mnt/pmem0/"
 
 using combotree::ComboTree;
 using combotree::Random;
@@ -23,11 +25,9 @@ int main(int argc,char* argv[]) {
   }else if(argc == 2){
     thread_num = atoi(argv[1]);
   }
-#ifdef SERVER
-  ComboTree* tree = new ComboTree("/mnt/pmem/combotree/", (1024*1024*1024*100UL), true);
-#else
-  ComboTree* tree = new ComboTree("/mnt/pmem0/", (1024*1024*512UL), true);
-#endif
+
+  ComboTree* tree = new ComboTree(COMBOTREE_DIR, true);
+
   std::cout << "THREAD NUM:            " << thread_num <<std::endl;
   std::cout << "TEST SIZE:             " << TEST_SIZE << std::endl;
 

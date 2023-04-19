@@ -216,9 +216,9 @@ void BLevel::Entry::FlushToCLevel(CLevel::MemControl* mem) {
 
 
 /****************************** BLevel ******************************/
-BLevel::BLevel(size_t data_size)
+BLevel::BLevel(std::string pmem_dir, size_t data_size)
   : nr_entries_(0), size_(0),
-    clevel_mem_(CLEVEL_PMEM_FILE, CLEVEL_PMEM_FILE_SIZE)
+    clevel_mem_(pmem_dir, CLEVEL_PMEM_FILE_SIZE)
 #ifndef NO_LOCK
     , lock_(nullptr)
 #endif
@@ -226,7 +226,7 @@ BLevel::BLevel(size_t data_size)
   physical_nr_entries_ = ((data_size+1+BLEVEL_EXPAND_BUF_KEY-1)/BLEVEL_EXPAND_BUF_KEY) * ENTRY_SIZE_FACTOR;
   size_t file_size = sizeof(Entry) * physical_nr_entries_;
 #ifdef USE_LIBPMEM
-  pmem_file_ = std::string(BLEVEL_PMEM_FILE) + std::to_string(file_id_++);
+  pmem_file_ = pmem_dir + std::string("combotree-blevel-") + std::to_string(file_id_++);
   int is_pmem;
   std::filesystem::remove(pmem_file_);
   pmem_addr_ = pmem_map_file(pmem_file_.c_str(), file_size + 64,
@@ -255,7 +255,7 @@ BLevel::BLevel(size_t data_size)
 #ifndef NO_LOCK
 #ifdef USE_BIT_LOCK
 #ifdef LOCK_IN_NVM
-  lock_pmem_file_ = std::string(BLEVEL_PMEM_FILE) + std::string("lock-") + std::to_string(lock_id_++);
+  lock_pmem_file_ = pmem_dir + std::string("combotree-blevel-") + std::string("lock-") + std::to_string(lock_id_++);
   int lock_is_pmem;
   std::filesystem::remove(lock_pmem_file_);
   lock_pmem_addr_ = pmem_map_file(lock_pmem_file_.c_str(), sizeof(bitlock)+(physical_nr_entries_)/8+1,
@@ -866,7 +866,7 @@ void BLevel::PrefixCompression() const {
     cnt[i] = 0;
 #ifdef BRANGE
   for (int i = 0; i < EXPAND_THREADS; ++i) {
-    for (int j = ranges_[i].physical_entry_start; j < ranges_[i].physical_entry_start + ranges_[i].entries; ++j) {
+    for (unsigned int j = ranges_[i].physical_entry_start; j < ranges_[i].physical_entry_start + ranges_[i].entries; ++j) {
       cnt[entries_[j].buf.suffix_bytes]++;
     }
   }

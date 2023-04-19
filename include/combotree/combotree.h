@@ -21,7 +21,7 @@ struct Pair {
 
 class ComboTree {
  public:
-  ComboTree(std::string pool_dir, size_t pool_size, bool create = true);
+  ComboTree(std::string pmem_dir, bool create = true);
   ~ComboTree();
 
   bool Put(uint64_t key, uint64_t value);
@@ -92,8 +92,7 @@ class ComboTree {
     COMBO_TREE_EXPANDING,
   };
 
-  std::string pool_dir_;
-  size_t pool_size_;
+  std::string pmem_dir_;
   ALevel* alevel_;
   BLevel* blevel_;
   BLevel* old_blevel_;
