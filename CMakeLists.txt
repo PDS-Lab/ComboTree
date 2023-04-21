@@ -16,10 +16,20 @@ if(BRANGE)
 endif(BRANGE)
 
 set(CLEVEL_PMEM_FILE_SIZE "(1024*1024*1024*16UL)")
+
+# how many kvs does blevel entry can store without creating its clevel tree
 set(BLEVEL_EXPAND_BUF_KEY 6)
-set(EXPANSION_FACTOR      4)
+
+# the factor to trigger expansion, see ComboTree::Put()
+set(EXPANSION_FACTOR      8)
+
+# span factor
 set(DEFAULT_SPAN          2)
+
+# in the beginning, kv is stored in libpmemkv, at how many kvs do we make a transition to ComboTree
 set(PMEMKV_THRESHOLD      3000)
+
+# preallocate extra blevel entries when doing expansion, see BLevel::BLevel()
 set(ENTRY_SIZE_FACTOR     1.2)
 
 configure_file(
